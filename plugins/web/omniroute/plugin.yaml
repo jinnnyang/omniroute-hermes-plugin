@@ -1,0 +1,8 @@
+id: web-search-omniroute
+name: OmniRoute Web Search Provider
+kind: backend
+version: 0.1.0
+description: "OmniRoute aggregated web search backend for Hermes web_search."
+author: jinnnyang
+provides_web_providers:
+  - omniroute

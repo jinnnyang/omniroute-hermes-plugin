@@ -1,0 +1,8 @@
+id: image-generation-omniroute
+name: OmniRoute Image Generation Provider
+kind: backend
+version: 0.1.0
+description: "OmniRoute Doubao Seedream Image Generation (经 OmniRoute 网关). Generates images synchronously (~25s). Downloads & saves images to local profile cache."
+author: jinnn
+requires_env:
+  - OMNIROUTE_BASE_URL

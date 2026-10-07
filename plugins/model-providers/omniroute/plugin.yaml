@@ -1,0 +1,6 @@
+id: model-provider-omniroute
+name: OmniRoute Model Provider
+kind: model-provider
+version: 0.1.0
+description: "OmniRoute 自建 LLM 聚合网关（火山 coding plan + OpenCode Go 订阅），keyless chat_completions / responses"
+author: jinnn
