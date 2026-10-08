@@ -64,6 +64,24 @@ plugins/
 
 `video_gen/`、`tts/`、`transcription/` 骨架待 OmniRoute 侧注册对应 provider 后补充（见路线图）。
 
+## 更新机制（自更新）
+
+插件在**加载时**自检并自动更新（不跟随 hermes 主程序更新节奏），逻辑在本仓库内：
+
+- **TTL 限频**：默认每 24h 检查一次，不频繁访问网络
+- **best-effort**：网络失败、git 缺失、文件占用等一律只打 stderr 提示，**绝不阻断插件加载**
+- **并发安全**：跨进程文件锁（CLI 与 Desktop 同时启动不冲突）
+- **生效时机**：本次进程仍用旧代码，替换在**下次启动**生效
+
+环境变量：
+
+| 变量 | 说明 |
+|---|---|
+| `OMNIROUTE_SELF_UPDATE_URL` | 插件仓库 URL（默认 `jinnnyang/omniroute-hermes-plugin`） |
+| `OMNIROUTE_SELF_UPDATE_TTL` | 检查间隔秒数（默认 `86400`；`0` = 每次加载都检查，`-1` = 禁用） |
+| `OMNIROUTE_SELF_UPDATE_OFF` | `1`/`true`/`yes` 禁用自更新 |
+| `OMNIROUTE_GIT` | git 可执行文件路径（默认取 PATH 上的 `git`） |
+
 ## 路线图
 
 1. **第一版（当前）**：LLM + 图片生成 + 网络搜索三条实测链路
@@ -73,5 +91,5 @@ plugins/
 ## 维护说明
 
 - 开发在 `C:\Users\jinnn\Documents\omniroute-hermes-plugin`（独立仓库，照 volcengine-hermes-plugin 模式）
-- hermes-agent fork 内保留 `plugins/model-providers/omniroute/` 最小骨架（feat/omniroute-plugin 分支），本仓库为完整实现载体
+- hermes-agent fork（jinnnyang）的安装脚本通过 `plugins` stage 从本仓库部署到 profile；此后由本插件的自更新机制接管增量更新
 - 本仓库所有"✅ 可用"能力均有 2026-10-07 端点实测记录（详见上方能力矩阵与各文件 docstring）
