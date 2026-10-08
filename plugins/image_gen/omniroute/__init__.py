@@ -24,6 +24,31 @@ from agent.image_gen_provider import (
 
 logger = logging.getLogger(__name__)
 
+
+def _maybe_self_update() -> None:
+    """Best-effort self-update (TTL-gated); never blocks the plugin load."""
+    try:
+        from plugins._omniroute_common.self_update import maybe_self_update
+    except ModuleNotFoundError:
+        import importlib.util
+        from pathlib import Path
+
+        spec = importlib.util.spec_from_file_location(
+            "omniroute_self_update",
+            Path(__file__).resolve().parents[2] / "_omniroute_common" / "self_update.py")
+        if spec is None or spec.loader is None:
+            return
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        maybe_self_update = module.maybe_self_update
+    try:
+        maybe_self_update()
+    except Exception:  # pragma: no cover - best-effort, never fail the plugin load
+        pass
+
+
+_maybe_self_update()
+
 # OmniRoute 图片生成端点（默认模型用户已确认 doubao-seedream-5.0-pro）
 _MODELS: Dict[str, Dict[str, Any]] = {
     "doubao-seedream-5.0-pro": {
