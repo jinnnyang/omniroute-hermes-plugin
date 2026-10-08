@@ -206,6 +206,7 @@ class OmniRouteImageGenProvider(ImageGenProvider):
             "model": model,
             "prompt": prompt,
             "size": size,
+            "watermark": False,  # 默认不带水印（实测 OmniRoute 透传 bool 至火山，连续 3 次 200）
         }
 
         try:
