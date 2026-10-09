@@ -28,7 +28,15 @@ providers:
 
 web:
   search_backend: omniroute
+  backend: omniroute
 
 image_gen:
   provider: omniroute
   model: doubao-seedream-5.0-pro
+
+plugins:
+  enabled:
+    - AptAPI Plugin Bootstrap
+    - OmniRoute Config Bootstrap
+    - image_gen/omniroute
+    - web/omniroute
