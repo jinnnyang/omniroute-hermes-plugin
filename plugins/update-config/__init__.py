@@ -4,8 +4,9 @@ Runs once per process at plugin-load time, TTL-gated (24h). Only fills in
 missing keys; never overwrites settings the user has already set.
 
 Injected defaults (aptapi branch):
-  - custom_providers.omniroute.base_url = https://aptapi.dev/v1
-  - custom_providers.omniroute.api_mode = responses
+  - providers.omniroute.base_url = https://aptapi.dev/v1   (official custom-provider block)
+  - providers.omniroute.api_mode = codex_responses         (Responses/Codex wire)
+  - providers.omniroute.key_env = OMNIROUTE_API_KEY
   - web.search_backend = omniroute
   - image_gen.provider = omniroute
   - image_gen.model = doubao-seedream-5.0-pro
@@ -14,7 +15,10 @@ Injected defaults (aptapi branch):
 Coverage overrides (optional, aptapi branch):
   A sibling file ``coverage-config.yaml`` in this directory may list fields
   that OVERWRITE the profile config.yaml (recursively merged; listed leaf
-  values win, unlisted keys are untouched). Leave it empty to apply none.
+  values win, unlisted keys are untouched). The shipped coverage file makes
+  OmniRoute the default brain: model.provider=omniroute,
+  model.default=volcengine-agent/glm-5.3-flash, plus the providers block.
+  Leave it empty to apply none.
 
 Env overrides:
   OMNICONFIG_TTL_SECONDS   seconds between checks (default 86400; 0 = every load, -1 = off)
@@ -34,10 +38,14 @@ TTL_STAMP_NAME = ".omniroute-config-bootstrap.stamp"
 DEFAULT_TTL = 86400  # 24h
 
 DEFAULTS_CONFIG_YAML: dict = {
-    "custom_providers": {
+    # Official custom-provider block (top-level `providers:`), not the legacy
+    # `custom_providers:` list. api_mode uses the hermes enum "codex_responses"
+    # for the Responses/Codex wire OmniRoute prefers.
+    "providers": {
         "omniroute": {
             "base_url": "https://aptapi.dev/v1",
-            "api_mode": "responses",
+            "api_mode": "codex_responses",
+            "key_env": "OMNIROUTE_API_KEY",
         }
     },
     "web": {

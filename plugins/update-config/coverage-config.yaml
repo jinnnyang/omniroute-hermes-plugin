@@ -1,27 +1,34 @@
-# coverage-config.yaml — optional field overrides for the Hermes profile's config.yaml.
+# coverage-config.yaml — OmniRoute aptapi-branch defaults, applied as OVERRIDES
+# to the Hermes profile's config.yaml at bootstrap time (TTL-gated, 24h).
 #
 # Semantics:
 #   - Keys listed here OVERWRITE the profile config.yaml (recursively merged;
-#     leaf values replace whatever is present, including explicit null to clear).
+#     leaf values replace whatever is present).
 #   - Keys NOT listed here are left untouched.
 #   - Contrast with the built-in defaults in __init__.py (DEFAULTS_CONFIG_YAML),
-#     which only fill in MISSING keys. This file is for values that must win
-#     even when the user already set them.
+#     which only fill in MISSING keys. This file wins even over user-set values.
 #
-# This file is loaded from the plugin directory at bootstrap time and ships
-# with the plugin, so edits here propagate to user profiles via plugin
-# self-update. Environment overrides (OMNIROUTE_BASE_URL etc.) still win at
-# runtime because providers resolve the env var at use time.
-#
-# Example:
-#   custom_providers:
-#     omniroute:
-#       base_url: https://aptapi.dev/v1
-#       api_mode: responses
-#   web:
-#     search_backend: omniroute
-#   image_gen:
-#     provider: omniroute
-#     model: doubao-seedream-5.0-pro
-#
-# Leave empty (no keys) to apply no overrides.
+# This file enables the omniroute-hermes-plugin (aptapi branch):
+#   - OmniRoute becomes the default model provider and default model.
+#   - The official top-level `providers:` block routes to the aptapi.dev
+#     production gateway over the Responses/Codex wire (codex_responses).
+#   - Web search and image generation go through OmniRoute.
+#   - Provider runtime still prefers the env overrides (OMNIROUTE_BASE_URL /
+#     OMNIROUTE_API_KEY) for the actual endpoint and key.
+
+model:
+  provider: omniroute
+  default: volcengine-agent/glm-5.3-flash
+
+providers:
+  omniroute:
+    base_url: https://aptapi.dev/v1
+    api_mode: codex_responses
+    key_env: OMNIROUTE_API_KEY
+
+web:
+  search_backend: omniroute
+
+image_gen:
+  provider: omniroute
+  model: doubao-seedream-5.0-pro
