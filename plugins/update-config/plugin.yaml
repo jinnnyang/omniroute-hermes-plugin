@@ -1,0 +1,6 @@
+id: update-config-omniroute
+name: OmniRoute Config Bootstrap
+kind: utility
+version: 0.1.0
+description: "First-launch config.yaml + .env bootstrap: injects OmniRoute defaults (base_url, web search, image gen) when missing. Best-effort, never overwrites user settings."
+author: jinnnyang

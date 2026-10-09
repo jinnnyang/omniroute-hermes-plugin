@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import os
 
-# 本机 OmniRoute 容器实际 API 端口（20129 空响应不可用）；可用 OMNIROUTE_BASE_URL 覆盖
-DEFAULT_BASE_URL = "http://localhost:20128/v1"
+# aptapi 分支默认指向远程生产网关；本机调试时用 OMNIROUTE_BASE_URL=http://localhost:20128/v1 覆盖
+DEFAULT_BASE_URL = "https://aptapi.dev/v1"
 
 
 def _strip_trailing_slash(value: str) -> str:

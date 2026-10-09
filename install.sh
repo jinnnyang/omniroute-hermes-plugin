@@ -42,6 +42,7 @@ Options:
   -h, --help                  Show this help.
 
 OmniRoute 是 keyless 网关（任意 Bearer 放行），无需真实 API key。
+默认端点 https://aptapi.dev/v1（已内置在插件代码中）。
 如需自定义端点，在 profile .env 中设置：
   OMNIROUTE_BASE_URL=http://localhost:20128/v1
 EOF
@@ -129,9 +130,9 @@ if [ "$ENABLE_MODEL" = 1 ]; then
     touch "$ENV_FILE"
     if [ -n "$BASE_URL" ] && ! grep -q "^OMNIROUTE_BASE_URL=" "$ENV_FILE" 2>/dev/null; then
       echo "OMNIROUTE_BASE_URL=$BASE_URL" >> "$ENV_FILE"
-    elif [ -z "$BASE_URL" ] && ! grep -q "^OMNIROUTE_BASE_URL=" "$ENV_FILE" 2>/dev/null; then
-      echo "OMNIROUTE_BASE_URL=http://localhost:20128/v1" >> "$ENV_FILE"
     fi
+    # If --base-url not given, leave OMNIROUTE_BASE_URL unset — the plugin's
+    # built-in default (https://aptapi.dev/v1) applies.
   fi
 fi
 

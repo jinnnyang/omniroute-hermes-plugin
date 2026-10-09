@@ -1,0 +1,6 @@
+id: update-skills-omniroute
+name: OmniRoute Agent Skills Sync
+kind: utility
+version: 0.1.0
+description: "Syncs OmniRoute Agent Skills (45 SKILL.md docs) from https://aptapi.dev/api/agent-skills into ~/.hermes/skills/aptapi/. Best-effort, TTL-gated."
+author: jinnnyang

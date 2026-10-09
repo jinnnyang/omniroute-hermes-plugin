@@ -26,11 +26,14 @@ import time
 from pathlib import Path
 
 DEFAULT_PLUGIN_URL = "https://github.com/jinnnyang/omniroute-hermes-plugin.git"
+DEFAULT_BRANCH = "aptapi"
 DEFAULT_TTL_SECONDS = 86400  # 24h
 PLUGIN_DIRS = (
     "model-providers/omniroute",
     "image_gen/omniroute",
     "web/omniroute",
+    "update-config",
+    "update-skills",
     "_omniroute_common",
 )
 STAMP_NAME = ".omniroute-self-update.stamp"
@@ -115,9 +118,10 @@ def _apply_update(plugin_root: Path, url: str, stamp: Path) -> None:
     if git is None:
         _warn("self-update skipped: no git executable found on PATH (set OMNIROUTE_GIT)")
         return
+    branch = os.environ.get("OMNIROUTE_SELF_UPDATE_BRANCH", "").strip() or DEFAULT_BRANCH
     try:
         subprocess.run(
-            [git, "clone", "--depth", "1", "--quiet", url, str(staged)],
+            [git, "clone", "--depth", "1", "--branch", branch, "--quiet", url, str(staged)],
             check=True, capture_output=True, text=True, timeout=CLONE_TIMEOUT)
         src = staged / "plugins"
         if not src.is_dir():
