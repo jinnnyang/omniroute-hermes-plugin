@@ -1,0 +1,27 @@
+# coverage-config.yaml — optional field overrides for the Hermes profile's config.yaml.
+#
+# Semantics:
+#   - Keys listed here OVERWRITE the profile config.yaml (recursively merged;
+#     leaf values replace whatever is present, including explicit null to clear).
+#   - Keys NOT listed here are left untouched.
+#   - Contrast with the built-in defaults in __init__.py (DEFAULTS_CONFIG_YAML),
+#     which only fill in MISSING keys. This file is for values that must win
+#     even when the user already set them.
+#
+# This file is loaded from the plugin directory at bootstrap time and ships
+# with the plugin, so edits here propagate to user profiles via plugin
+# self-update. Environment overrides (OMNIROUTE_BASE_URL etc.) still win at
+# runtime because providers resolve the env var at use time.
+#
+# Example:
+#   custom_providers:
+#     omniroute:
+#       base_url: https://aptapi.dev/v1
+#       api_mode: responses
+#   web:
+#     search_backend: omniroute
+#   image_gen:
+#     provider: omniroute
+#     model: doubao-seedream-5.0-pro
+#
+# Leave empty (no keys) to apply no overrides.

@@ -11,6 +11,11 @@ Injected defaults (aptapi branch):
   - image_gen.model = doubao-seedream-5.0-pro
   - .env: OMNIROUTE_API_KEY=local (keyless gateway placeholder)
 
+Coverage overrides (optional, aptapi branch):
+  A sibling file ``coverage-config.yaml`` in this directory may list fields
+  that OVERWRITE the profile config.yaml (recursively merged; listed leaf
+  values win, unlisted keys are untouched). Leave it empty to apply none.
+
 Env overrides:
   OMNICONFIG_TTL_SECONDS   seconds between checks (default 86400; 0 = every load, -1 = off)
   OMNICONFIG_OFF           set to 1/true/yes to disable entirely
@@ -114,6 +119,40 @@ def _deep_merge_missing(dst: dict, defaults: dict) -> bool:
     return changed
 
 
+def _deep_merge_overwrite(dst: dict, coverage: dict) -> bool:
+    """Overwrite keys in dst that appear in coverage; untouched keys are kept.
+
+    Nested dicts recurse; leaf values replace whatever is present (including
+    explicit null to clear a key). Returns True if anything changed.
+    """
+    changed = False
+    for k, v in coverage.items():
+        if isinstance(v, dict):
+            if not isinstance(dst.get(k), dict):
+                dst[k] = {kk: vv for kk, vv in v.items()}
+                changed = True
+            elif _deep_merge_overwrite(dst[k], v):
+                changed = True
+        else:
+            if dst.get(k) != v:
+                dst[k] = v
+                changed = True
+    return changed
+
+
+def _load_coverage() -> dict:
+    """Load the optional sibling ``coverage-config.yaml``. Never raises."""
+    path = Path(__file__).parent / "coverage-config.yaml"
+    try:
+        if not path.exists():
+            return {}
+        _, data = _load_yaml(path)
+        return data if isinstance(data, dict) else {}
+    except Exception as exc:
+        _warn(f"coverage-config.yaml skipped: {exc}")
+        return {}
+
+
 # --- .env helper --------------------------------------------------------------
 
 def _ensure_env_placeholder(home: Path) -> None:
@@ -184,6 +223,11 @@ def bootstrap_config() -> None:
             if _deep_merge_missing(data, DEFAULTS_CONFIG_YAML):
                 _write_yaml(cfg_path, yaml_obj, data)
                 _warn("config.yaml: injected missing OmniRoute defaults (existing values preserved)")
+            coverage = _load_coverage()
+            if coverage:
+                if _deep_merge_overwrite(data, coverage):
+                    _write_yaml(cfg_path, yaml_obj, data)
+                    _warn("config.yaml: applied coverage overrides from coverage-config.yaml")
     except Exception as exc:
         _warn(f"config.yaml bootstrap skipped: {exc}")
 
