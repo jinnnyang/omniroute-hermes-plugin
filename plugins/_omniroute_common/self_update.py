@@ -144,10 +144,20 @@ def _apply_update(plugin_root: Path, url: str, stamp: Path) -> None:
         shutil.rmtree(staged, ignore_errors=True)
 
 
+def _fmt_ttl(ttl: int) -> str:
+    """Human-readable TTL, e.g. 86400 -> '24h'."""
+    if ttl % 3600 == 0:
+        return f"{ttl // 3600}h"
+    if ttl % 60 == 0:
+        return f"{ttl // 60}m"
+    return f"{ttl}s"
+
+
 def maybe_self_update() -> None:
     """TTL-gated, best-effort refresh of the omniroute plugin dirs (once/process).
 
-    Never raises: any failure degrades to a stderr note.
+    Never raises: any failure degrades to a stderr note. Every outcome prints a
+    status line so a launch always shows the self-update state.
     """
     global _done
     if _done:
@@ -157,21 +167,29 @@ def maybe_self_update() -> None:
             return
         _done = True  # marked attempted; no retry within this process
     if not _enabled():
+        _warn("self-update: disabled (OMNIROUTE_SELF_UPDATE_OFF set or TTL < 0)")
         return
     plugin_root = _profile_plugin_root()
     if plugin_root is None or not plugin_root.is_dir():
+        _warn("self-update: skipped (plugins root not found)")
         return
     stamp = plugin_root / STAMP_NAME
     ttl = _ttl_seconds()
     try:
-        if ttl > 0 and stamp.exists() and time.time() - stamp.stat().st_mtime < ttl:
-            return  # checked recently; skip network
+        if ttl > 0 and stamp.exists():
+            age = time.time() - stamp.stat().st_mtime
+            if age < ttl:
+                last = time.strftime("%m-%d %H:%M", time.localtime(stamp.stat().st_mtime))
+                nxt = time.strftime("%m-%d %H:%M", time.localtime(stamp.stat().st_mtime + ttl))
+                _warn(f"self-update: skipped (last check {last}, TTL {_fmt_ttl(ttl)}, next check {nxt})")
+                return
     except OSError:
         pass
     url = os.environ.get("OMNIROUTE_SELF_UPDATE_URL", "").strip() or DEFAULT_PLUGIN_URL
     lock = _acquire_lock(plugin_root)
     if lock is None:
-        return  # another process is updating
+        _warn("self-update: skipped (another process holds the update lock)")
+        return
     try:
         _apply_update(plugin_root, url, stamp)
     finally:
