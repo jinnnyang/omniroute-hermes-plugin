@@ -18,13 +18,52 @@
 
 model:
   provider: omniroute
-  default: volcengine-agent/glm-5.3-flash
+  default: think/understanding
 
-providers:
-  omniroute:
-    base_url: https://aptapi.dev/v1
-    api_mode: codex_responses
-    key_env: OMNIROUTE_API_KEY
+# ---- 辅助任务 → 能力剖面 lane（已确认映射）----
+auxiliary:
+  # 上下文压缩 → think/memory（context-optimized，长上下文档更可信）
+  # 模型池: volcengine-coding/doubao-seed-2-1-turbo-260628 · volcengine-agent/doubao-seed-2.1-turbo
+  #         volcengine-coding/deepseek-v4-1-flash-260910 · bai/deepseek-v4.1-flash · bai/kimi-k2.6
+  compression:
+    provider: omniroute
+    model: think/memory
+
+  # 任务分流/意图理解 → think/understanding（priority，glm-5.3-flash 系）
+  triage_specifier:
+    provider: omniroute
+    model: think/understanding
+
+  # 任务拆解/规划 → think/planning（priority，minimax-m3 98% 实证）
+  kanban_decomposer:
+    provider: omniroute
+    model: think/planning
+
+  # 视觉理解 → think/multimodal（priority，bai/mimo-v2.6-pro）
+  # ⚠ glm-cn/glm-4.6v 已失效（165 次 0 成功，401 Invalid API key），故改指 bai/mimo
+  vision:
+    provider: omniroute
+    model: think/multimodal
+
+  # MoA 引用模型 → think/reasoning（priority，bai/kimi-k3）
+  moa_reference:
+    provider: omniroute
+    model: think/reasoning
+
+  # 安全审批 → reliable/safety（priority，bai/claude-haiku-5.5 100% 实证）
+  approval:
+    provider: omniroute
+    model: reliable/safety
+
+  # MCP 工具调用 → act/tool-calling（weighted）
+  mcp:
+    provider: omniroute
+    model: act/tool-calling
+
+  # 标题生成 → reliable/cost（cost-optimized，bai/gpt-5-nano 档）
+  title_generation:
+    provider: omniroute
+    model: reliable/cost
 
 web:
   search_backend: omniroute

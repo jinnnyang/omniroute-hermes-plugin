@@ -112,7 +112,7 @@ def _fallback_models() -> tuple[str, ...]:
 
 
 class OmniRouteProviderProfile(ProviderProfile):
-    """OmniRoute 聚合网关 model provider（chat_completions；responses 侧同样可用）。"""
+    """OmniRoute 聚合网关 model provider（codex_responses 默认；chat_completions 兼容保留）。"""
 
     def fetch_models(
         self,
@@ -169,7 +169,7 @@ omniroute_provider = OmniRouteProviderProfile(
     display_name="OmniRoute",
     description="OmniRoute — 自建 LLM 聚合网关（火山 coding plan + OpenCode Go 订阅）",
     aliases=("omni", "omniroute-ai"),
-    api_mode="chat_completions",
+    api_mode="codex_responses",  # 火山 Coding Plan 官方推荐协议（Responses）；chat_completions 仅兼容保留
     env_vars=("OMNIROUTE_API_KEY", "OMNIROUTE_BASE_URL"),
     base_url=_BASE_URL,
     models_url=resolve_omniroute_endpoint("models"),

@@ -42,7 +42,7 @@ OMNIROUTE_BASE_URL=http://localhost:20128/v1   # 默认值；本机容器实际 
 custom_providers:
   omniroute:
     base_url: http://localhost:20128/v1
-    api_mode: chat_completions
+    api_mode: codex_responses
 web:
   search_backend: omniroute
 image_gen:
@@ -57,7 +57,7 @@ image_gen:
 ```
 plugins/
 ├── _omniroute_common/config.py      # 共享配置：base_url/key 解析（env + 默认值）
-├── model-providers/omniroute/       # LLM provider（chat_completions；fetch_models 尝试+兜底）
+├── model-providers/omniroute/       # LLM provider（codex_responses 默认；fetch_models 尝试+兜底）
 ├── image_gen/omniroute/             # 图片生成（doubao-seedream-5.0-pro，同步 ~25s）
 └── web/omniroute/                   # 网络搜索（/v1/search → web results）
 ```
