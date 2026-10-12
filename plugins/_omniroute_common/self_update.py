@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import os
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -48,6 +49,17 @@ _done = False
 
 def _warn(message: str) -> None:
     print(f"[omniroute] {message}", file=sys.stderr)
+
+
+def _rmtree(path: Path) -> None:
+    """rmtree that survives read-only files (Windows git pack files are 0444)."""
+    def _onerror(func, p, _exc):
+        try:
+            os.chmod(p, stat.S_IWRITE)
+            func(p)
+        except OSError:
+            pass
+    shutil.rmtree(path, onerror=_onerror)
 
 
 def _profile_plugin_root() -> Path | None:
@@ -133,7 +145,7 @@ def _apply_update(plugin_root: Path, url: str, stamp: Path) -> None:
             if not src_dir.is_dir():
                 continue
             dst = plugin_root / rel
-            shutil.rmtree(dst, ignore_errors=True)
+            _rmtree(dst)
             shutil.copytree(src_dir, dst)
             replaced.append(rel)
         stamp.write_text(f"time={time.time()}\n", encoding="utf-8")
@@ -141,7 +153,7 @@ def _apply_update(plugin_root: Path, url: str, stamp: Path) -> None:
     except (subprocess.SubprocessError, OSError) as exc:
         _warn(f"self-update skipped: {exc}")
     finally:
-        shutil.rmtree(staged, ignore_errors=True)
+        _rmtree(staged)
 
 
 def _fmt_ttl(ttl: int) -> str:
