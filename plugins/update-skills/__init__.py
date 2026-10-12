@@ -33,7 +33,11 @@ _done = False
 
 
 def _warn(msg: str) -> None:
-    print(f"[omniroute-skills] {msg}", file=sys.stderr)
+    # Windows stderr may be GBK: never let printing a warning kill the sync
+    try:
+        print(f"[omniroute-skills] {msg}", file=sys.stderr)
+    except UnicodeEncodeError:
+        print(f"[omniroute-skills] {msg.encode('ascii', 'replace').decode()}", file=sys.stderr)
 
 
 def _profile_home() -> Path | None:

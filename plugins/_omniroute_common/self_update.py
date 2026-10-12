@@ -48,7 +48,11 @@ _done = False
 
 
 def _warn(message: str) -> None:
-    print(f"[omniroute] {message}", file=sys.stderr)
+    # Windows stderr may be GBK: never let printing a warning kill the update
+    try:
+        print(f"[omniroute] {message}", file=sys.stderr)
+    except UnicodeEncodeError:
+        print(f"[omniroute] {message.encode('ascii', 'replace').decode()}", file=sys.stderr)
 
 
 def _rmtree(path: Path) -> None:
