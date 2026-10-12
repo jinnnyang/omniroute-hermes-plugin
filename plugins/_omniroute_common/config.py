@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import os
 
-# aptapi 分支默认指向远程生产网关；本机调试时用 OMNIROUTE_BASE_URL=http://localhost:20128/v1 覆盖
+# 默认指向远程生产网关 aptapi.dev；本机调试时用 OMNIROUTE_BASE_URL=http://localhost:20128/v1 覆盖
 DEFAULT_BASE_URL = "https://aptapi.dev/v1"
 
 
