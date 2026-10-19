@@ -1,8 +1,9 @@
 """OmniRoute web search backend for Hermes web_search.
 
-实测（2026-10-07）：`POST {base}/search` 返回 200，body {query, limit} →
+实测（2026-10-19）：`POST {base}/search` 返回 200，body {query, limit, provider?} →
 `{id, provider, query, results: [{title, url, display_url, snippet, position, ...}]}`。
-provider 当前为 duckduckgo-free（keyless）。
+可选 `provider` 字段指定 upstream（实测支持 tavily / firecrawl / duckduckgo）；
+缺省由服务器决定（当前默认 firecrawl）。
 """
 from __future__ import annotations
 
@@ -92,12 +93,15 @@ class OmniRouteWebSearchProvider(WebSearchProvider):
     def supports_extract(self) -> bool:
         return False
 
-    def search(self, query: str, limit: int = 5) -> Dict[str, Any]:
+    def search(self, query: str, limit: int = 5, provider: str = "") -> Dict[str, Any]:
         query = (query or "").strip()
         if not query:
             return {"success": False, "error": "Empty search query"}
 
         count = max(1, min(int(limit), MAX_SEARCH_COUNT))
+        payload: Dict[str, Any] = {"query": query, "limit": count}
+        if provider:
+            payload["provider"] = provider
         headers = {"Content-Type": "application/json"}
         api_key = _get_api_key()
         if api_key:
@@ -106,7 +110,7 @@ class OmniRouteWebSearchProvider(WebSearchProvider):
         try:
             response = httpx.post(
                 _resolve_endpoint(),
-                json={"query": query, "limit": count},
+                json=payload,
                 headers=headers,
                 timeout=20,
             )
@@ -150,7 +154,7 @@ class OmniRouteWebSearchProvider(WebSearchProvider):
         return {
             "name": "OmniRoute Search",
             "badge": "free",
-            "tag": "OmniRoute aggregated web search (当前 upstream: duckduckgo-free); search only.",
+            "tag": "OmniRoute aggregated web search; provider=tavily/firecrawl/duckduckgo (缺省=服务器默认, 当前 firecrawl). search only.",
             "env_vars": [
                 {
                     "key": "OMNIROUTE_BASE_URL",
