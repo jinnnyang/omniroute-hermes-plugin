@@ -126,11 +126,11 @@ def _acquire_lock(plugin_root: Path) -> Path | None:
 
 
 def _apply_update(plugin_root: Path, url: str, stamp: Path) -> None:
-    staged = Path(tempfile.mkdtemp(prefix="omniroute-selfupdate-", dir=str(plugin_root.parent)))
     git = _git_exe()
     if git is None:
         _warn("self-update skipped: no git executable found on PATH (set OMNIROUTE_GIT)")
         return
+    staged = Path(tempfile.mkdtemp(prefix="omniroute-selfupdate-", dir=str(plugin_root.parent)))
     try:
         subprocess.run(
             [git, "clone", "--depth", "1", "--quiet", url, str(staged)],
