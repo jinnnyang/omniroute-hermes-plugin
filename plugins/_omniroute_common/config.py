@@ -21,7 +21,7 @@ def resolve_omniroute_base_url() -> str:
 
     Precedence:
     1. OMNIROUTE_BASE_URL, if explicitly provided.
-    2. DEFAULT_BASE_URL (https://aptapi.dev/v1).
+    2. DEFAULT_BASE_URL (localhost:20128/v1).
     """
     explicit_base_url = os.environ.get("OMNIROUTE_BASE_URL", "").strip()
     if explicit_base_url:
